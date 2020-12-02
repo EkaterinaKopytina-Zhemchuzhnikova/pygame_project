@@ -2,9 +2,9 @@ import pygame, os, sys
 from random import randint, choice
 
 pygame.init()
-size = WIDTH, HEIGHT = 1000, 600
+size = WIDTH, HEIGHT = 870, 600
 screen = pygame.display.set_mode(size)
-
+HERO_LIST = ['my_pirat.png', 'prog_pirat.png']
 
 def terminate():
     pygame.quit()
@@ -32,9 +32,11 @@ def start_screen():
     x, y = None, None
     intro_text = ["Игра 'Морской бой'", "",
                   "Правила игры",
+                  "Выбрать игрока",
+                  "Расставить корабли произвольно",
                   "Помощь"]
     menu_border = pygame.sprite.Group()
-
+    menu_hero = pygame.sprite.Group()
     fon = pygame.transform.scale(load_image('start screen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 50)
@@ -62,11 +64,42 @@ def start_screen():
                         elif index_in_nenu == 2:
                             readfile('data/Rules.txt')
                         elif index_in_nenu == 3:
+                            choose_hero(menu_hero)
+                        elif index_in_nenu == 4:
+                            pass
+                        elif index_in_nenu == 5:
                             readfile('data/Help.txt')
             elif event.type == pygame.KEYDOWN:
                 return
         pygame.display.flip()
 
+def choose_hero(hero):
+    global my_hero_image
+    screen.fill(pygame.Color("#4682B4"))
+    sign = 1
+    for img in HERO_LIST:
+        sprite_hero = pygame.sprite.Sprite()
+        sprite_hero.image = pygame.transform.scale(load_image(img, -1), (150, 200))
+        sprite_hero.rect = sprite_hero.image.get_rect()
+        hero.add(sprite_hero)
+        sprite_hero.rect.y = HEIGHT // 2 - sprite_hero.rect.h // 2
+    for spr in hero:
+        spr.rect.x = WIDTH // 2 - spr.rect.w // 2 + sign * 100
+        sign *= -1
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN:
+                return
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                for spr in hero:
+                    if spr.rect.collidepoint(event.pos):
+                        index_in_nenu_hero = hero.sprites().index(spr)
+                        my_hero_image = HERO_LIST[index_in_nenu_hero]
+        hero.draw(screen)
+        pygame.display.flip()
 
 def readfile(filename):
     screen.fill(pygame.Color("#4682B4"))
@@ -98,6 +131,7 @@ class MyBoard:
         self.board = [[0] * width for _ in range(height)]
         # значения по умолчанию
         self.x_0, self.y_0, self.cell_size = 10, 10, 30
+
         self.cnt_single_decks = 4
         self.cnt_double_decks = 3
         self.cnt_three_deck = 2
@@ -110,33 +144,25 @@ class MyBoard:
         self.x_0 = x_0
         self.y_0 = y_0
         self.cell_size = cell_size
-
+        self.water, self.paluba = pygame.transform.scale(load_image('water2.jpg'),
+                                                         (self.cell_size, self.cell_size)), pygame.transform.scale(
+            load_image('one.png'), (self.cell_size, self.cell_size))
+        self.bomb = pygame.transform.scale(load_image('boom.png'),
+                                                         (self.cell_size - 3, self.cell_size - 3))
     def render(self):
-
         for y in range(self.height):
             for x in range(self.width):
+                screen.blit(self.water, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == 1:
-                    pygame.draw.rect(screen, pygame.Color('green'), (
-                        x * self.cell_size + self.x_0, y * self.cell_size + self.y_0, self.cell_size, self.cell_size))
+                    screen.blit(self.paluba, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == 2:
-                    pygame.draw.rect(screen, pygame.Color('green'), (
-                        x * self.cell_size + self.x_0, y * self.cell_size + self.y_0, self.cell_size, self.cell_size))
+                    screen.blit(self.paluba, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == 3:
-                    pygame.draw.rect(screen, pygame.Color('green'), (
-                        x * self.cell_size + self.x_0, y * self.cell_size + self.y_0, self.cell_size, self.cell_size))
+                    screen.blit(self.paluba, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == 4:
-                    pygame.draw.rect(screen, pygame.Color('green'), (
-                        x * self.cell_size + self.x_0, y * self.cell_size + self.y_0, self.cell_size, self.cell_size))
+                    screen.blit(self.paluba, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == -1:
-                    pygame.draw.line(screen, pygame.Color("red"),
-                                     (self.x_0 + x * self.cell_size + 2, self.y_0 + y * self.cell_size + 2),
-                                     (self.x_0 + x * self.cell_size - 2 + self.cell_size,
-                                      self.y_0 + y * self.cell_size - 2 + self.cell_size), 2)
-                    pygame.draw.line(screen, pygame.Color("red"),
-                                     (self.x_0 + x * self.cell_size + 2,
-                                      self.y_0 + y * self.cell_size + self.cell_size - 2),
-                                     (self.x_0 + x * self.cell_size - 2 + self.cell_size,
-                                      self.y_0 + y * self.cell_size + 2), 2)
+                    screen.blit(self.bomb, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == -2:
                     pygame.draw.rect(screen, pygame.Color('red'), (
                         x * self.cell_size + self.cell_size // 2 + self.x_0,
@@ -259,6 +285,7 @@ class EnemyBoard:
     def render(self):
         for y in range(self.height):
             for x in range(self.width):
+                screen.blit(self.water, (x * self.cell_size + self.left, y * self.cell_size + self.top))
                 if self.board[y][x] == 1:
                     pygame.draw.rect(screen, pygame.Color('green'), (
                         x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size, self.cell_size))
@@ -274,15 +301,7 @@ class EnemyBoard:
                         x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size, self.cell_size))
 
                 if self.board[y][x] == -1:
-                    pygame.draw.line(screen, pygame.Color("red"),
-                                     (self.left + x * self.cell_size + 2, self.top + y * self.cell_size + 2),
-                                     (self.left + x * self.cell_size - 2 + self.cell_size,
-                                      self.top + y * self.cell_size - 2 + self.cell_size), 2)
-                    pygame.draw.line(screen, pygame.Color("red"),
-                                     (self.left + x * self.cell_size + 2,
-                                      self.top + y * self.cell_size + self.cell_size - 2),
-                                     (self.left + x * self.cell_size - 2 + self.cell_size,
-                                      self.top + y * self.cell_size + 2), 2)
+                    screen.blit(self.bomb, (x * self.cell_size + self.left, y * self.cell_size + self.top))
                 if self.board[y][x] == -2:
                     pygame.draw.rect(screen, pygame.Color('red'), (
                         x * self.cell_size + self.cell_size // 2 + self.left,
@@ -296,6 +315,10 @@ class EnemyBoard:
         self.left = left
         self.top = top
         self.cell_size = cell_size
+        self.bomb = pygame.transform.scale(load_image('boom.png'),
+                                           (self.cell_size - 3, self.cell_size - 3))
+        self.water = pygame.transform.scale(load_image('water.jpg'),
+                                                         (self.cell_size, self.cell_size))
 
     def get_cell(self, mouse_pos):
         cell_x = (mouse_pos[0] - self.left) // self.cell_size
@@ -528,7 +551,19 @@ def create_baloon(mess_rect):
     for _ in range(baloon_count):
         Baloon(mess_rect)
 
+def total_play(my_total=3, enemy_total=3):
+    font = pygame.font.Font(None, 50)
+    text1 = font.render("Счёт", True, pygame.Color("white"))
+    text1_x, text1_y = 380, 430
+    text1_w, text1_h = text1.get_width(), text1.get_height()
+    text2 = font.render(f"{my_total}  :  {enemy_total}", True, pygame.Color("white"))
+    text2_x, text2_y = 380, 500
+    text2_w, text2_h = text2.get_width(), text2.get_height()
+    screen.blit(text1, (text1_x, text1_y))
+    screen.blit(text2, (text2_x, text2_y))
+
 # congradulations('people')
+my_hero_image = None
 start_screen()
 my_board = MyBoard(10, 10)
 my_board.set_view(10, 10, 40)
@@ -539,6 +574,7 @@ running = True
 one = two = three = four = right = None
 move = True
 can_arrange = True
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -563,10 +599,13 @@ while running:
                 one, two, three, four = False, False, False, True
 
     screen.fill((0, 0, 0))
-    fon1 = pygame.transform.scale(load_image('my_pirat.png'), (120, 140))
-    screen.blit(fon1, (150, 440))
-    fon2 = pygame.transform.scale(load_image('prog_pirat.png'), (120, 140))
-    screen.blit(fon2, (600, 440))
+    if my_hero_image:
+        screen.blit(pygame.transform.scale(load_image(my_hero_image), (120, 140)), (150, 440))
+        screen.blit(pygame.transform.scale(load_image(HERO_LIST[1 - HERO_LIST.index(my_hero_image)]), (120, 140)), (600, 440))
+    else:
+        screen.blit(pygame.transform.scale(load_image(HERO_LIST[0]), (120, 140)), (150, 440))
+        screen.blit(pygame.transform.scale(load_image(HERO_LIST[1]), (120, 140)), (600, 440))
+    total_play()
     my_board.render()
     en_board.render()
     pygame.display.flip()
