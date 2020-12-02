@@ -2,7 +2,7 @@ import pygame, os, sys
 from random import randint, choice
 
 pygame.init()
-size = WIDTH, HEIGHT = 1000, 450
+size = WIDTH, HEIGHT = 1000, 600
 screen = pygame.display.set_mode(size)
 
 
@@ -484,7 +484,7 @@ def congradulations(winner):
     text_w = text.get_width()
     text_h = text.get_height()
 
-    create_particles((text_x, text_y, text_w, text_h))
+    create_baloon((text_x, text_y, text_w, text_h))
 
     clock = pygame.time.Clock()
     while True:
@@ -502,12 +502,12 @@ def congradulations(winner):
 all_sprites = pygame.sprite.Group()
 
 
-class Particle(pygame.sprite.Sprite):
+class Baloon(pygame.sprite.Sprite):
     img = [load_image("fei2.png", -1)]
     for scale in (5, 10, 20):
         img.append(pygame.transform.scale(img[0], (scale, scale)))
 
-    def __init__(self, dx, dy, mess_rect):
+    def __init__(self, mess_rect):
         super().__init__(all_sprites)
         self.image = choice(self.img)
         self.rect = self.image.get_rect()
@@ -518,18 +518,17 @@ class Particle(pygame.sprite.Sprite):
                 break
 
     def update(self):
-        self.rect.y = self.rect.y - 1
+        self.rect.y -= 1
         if self.rect.colliderect(self.mess_rect):
             self.kill()
 
 
-def create_particles(mess_rect):
-    particle_count = 30
-    numbers = range(-5, 6)
-    for _ in range(particle_count):
-        Particle(choice(numbers), choice(numbers), mess_rect)
+def create_baloon(mess_rect):
+    baloon_count = 30
+    for _ in range(baloon_count):
+        Baloon(mess_rect)
 
-
+# congradulations('people')
 start_screen()
 my_board = MyBoard(10, 10)
 my_board.set_view(10, 10, 40)
@@ -564,6 +563,10 @@ while running:
                 one, two, three, four = False, False, False, True
 
     screen.fill((0, 0, 0))
+    fon1 = pygame.transform.scale(load_image('my_pirat.png'), (120, 140))
+    screen.blit(fon1, (150, 440))
+    fon2 = pygame.transform.scale(load_image('prog_pirat.png'), (120, 140))
+    screen.blit(fon2, (600, 440))
     my_board.render()
     en_board.render()
     pygame.display.flip()
