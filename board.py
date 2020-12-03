@@ -1,4 +1,6 @@
-import pygame, os, sys
+import pygame
+import os
+import sys
 from random import randint, choice
 
 pygame.init()
@@ -6,9 +8,20 @@ size = WIDTH, HEIGHT = 870, 600
 screen = pygame.display.set_mode(size)
 HERO_LIST = ['my_pirat.png', 'prog_pirat.png']
 
+
 def terminate():
     pygame.quit()
     sys.exit()
+
+
+def load_music(name):
+    fullname = os.path.join('data', name)
+    try:
+        pygame.mixer.music.load(fullname)
+        pygame.mixer.music.play(-1)
+    except pygame.error as message:
+        print('Cannot load music:', name)
+        raise SystemExit(message)
 
 
 def load_image(name, color_key=None):
@@ -29,17 +42,20 @@ def load_image(name, color_key=None):
 
 
 def start_screen():
+    global load_map
+    load_music('start.wav')
     x, y = None, None
     intro_text = ["Игра 'Морской бой'", "",
                   "Правила игры",
                   "Выбрать игрока",
-                  "Расставить корабли произвольно",
-                  "Помощь"]
+                  "Произвольно расставить корабли",
+                  "Помощь", "",
+                  "Начать игру"]
     menu_border = pygame.sprite.Group()
     menu_hero = pygame.sprite.Group()
     fon = pygame.transform.scale(load_image('start screen.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 50)
+    font = pygame.font.Font(None, 30)
     text_coord = 100
     for line in intro_text:
         sprite = pygame.sprite.Sprite()
@@ -55,6 +71,8 @@ def start_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+            elif event.type == pygame.KEYDOWN:
+                return
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 for spr in menu_border:
                     if spr.intro_rect.collidepoint(event.pos):
@@ -66,12 +84,15 @@ def start_screen():
                         elif index_in_nenu == 3:
                             choose_hero(menu_hero)
                         elif index_in_nenu == 4:
-                            pass
+                            color = '#4169E1' if load_map else 'black'
+                            pygame.draw.line(screen, pygame.Color(color), (10, 255), (287, 255), 2)
+                            load_map = not load_map
                         elif index_in_nenu == 5:
                             readfile('data/Help.txt')
-            elif event.type == pygame.KEYDOWN:
-                return
+                        elif index_in_nenu == 7:
+                            return
         pygame.display.flip()
+
 
 def choose_hero(hero):
     global my_hero_image
@@ -100,6 +121,7 @@ def choose_hero(hero):
                         my_hero_image = HERO_LIST[index_in_nenu_hero]
         hero.draw(screen)
         pygame.display.flip()
+
 
 def readfile(filename):
     screen.fill(pygame.Color("#4682B4"))
@@ -148,7 +170,8 @@ class MyBoard:
                                                          (self.cell_size, self.cell_size)), pygame.transform.scale(
             load_image('one.png'), (self.cell_size, self.cell_size))
         self.bomb = pygame.transform.scale(load_image('boom.png'),
-                                                         (self.cell_size - 3, self.cell_size - 3))
+                                           (self.cell_size - 3, self.cell_size - 3))
+
     def render(self):
         for y in range(self.height):
             for x in range(self.width):
@@ -318,7 +341,7 @@ class EnemyBoard:
         self.bomb = pygame.transform.scale(load_image('boom.png'),
                                            (self.cell_size - 3, self.cell_size - 3))
         self.water = pygame.transform.scale(load_image('water.jpg'),
-                                                         (self.cell_size, self.cell_size))
+                                            (self.cell_size, self.cell_size))
 
     def get_cell(self, mouse_pos):
         cell_x = (mouse_pos[0] - self.left) // self.cell_size
@@ -499,6 +522,7 @@ class EnemyBoard:
 
 
 def congradulations(winner):
+    load_music('final.wav')
     message = "Вы выиграли! Поздравляем!" if winner == "people" else "Вы проиграли!"
     font = pygame.font.Font(None, 50)
     text = font.render(message, True, pygame.Color("#000080"))
@@ -551,22 +575,50 @@ def create_baloon(mess_rect):
     for _ in range(baloon_count):
         Baloon(mess_rect)
 
+
 def total_play(my_total=3, enemy_total=3):
     font = pygame.font.Font(None, 50)
     text1 = font.render("Счёт", True, pygame.Color("white"))
     text1_x, text1_y = 380, 430
-    text1_w, text1_h = text1.get_width(), text1.get_height()
     text2 = font.render(f"{my_total}  :  {enemy_total}", True, pygame.Color("white"))
     text2_x, text2_y = 380, 500
-    text2_w, text2_h = text2.get_width(), text2.get_height()
     screen.blit(text1, (text1_x, text1_y))
     screen.blit(text2, (text2_x, text2_y))
 
+
+def load_map_file(filename):
+    filename = "data/" + filename
+    # читаем уровень, убирая символы перевода строки
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+    max_width = max(map(len, level_map))
+    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+
+
+tiles_group = pygame.sprite.Group()
+
+
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, tile_type, pos_x, pos_y):
+        super().__init__(tiles_group)
+        self.image = tile_images[tile_type]
+        self.rect = self.image.get_rect().move(tile_width * pos_x + 10, tile_height * pos_y + 10)
+
+
+def generate_map(my_map):
+    for y in range(len(my_map)):
+        for x in range(len(my_map[y])):
+            if my_map[y][x] == '.':
+                Tile('water', x, y)
+            elif my_map[y][x] == '#':
+                Tile('boat', x, y)
+
+
 # congradulations('people')
+load_map = False
 my_hero_image = None
 start_screen()
-my_board = MyBoard(10, 10)
-my_board.set_view(10, 10, 40)
+load_music('base.wav')
 en_board = EnemyBoard(10, 10)
 en_board.set_view(450, 10, 40)
 en_board.take_a_cage()
@@ -574,6 +626,16 @@ running = True
 one = two = three = four = right = None
 move = True
 can_arrange = True
+if load_map:
+    tile_width = tile_height = 40
+    tile_images = {'water': pygame.transform.scale(load_image('water.jpg'),
+                                                   (tile_width, tile_height)),
+                   'boat': pygame.transform.scale(load_image('one.png'), (tile_width, tile_height))}
+
+    generate_map(load_map_file(choice(['first_test_map.txt', 'second_test_map.txt'])))
+else:
+    my_board = MyBoard(10, 10)
+    my_board.set_view(10, 10, 40)
 
 while running:
     for event in pygame.event.get():
@@ -581,7 +643,11 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if can_arrange:
-                my_board.get_click(event.pos)
+                pass
+                # if load_map:
+                #     tile.get_click(event.pos)
+                # else:
+                #     my_board.get_click(event.pos)
             else:
                 en_board.get_click(event.pos)
         if event.type == pygame.KEYDOWN:
@@ -597,16 +663,19 @@ while running:
                 one, two, three, four = False, False, True, False
             elif event.key == pygame.K_4:
                 one, two, three, four = False, False, False, True
-
     screen.fill((0, 0, 0))
     if my_hero_image:
         screen.blit(pygame.transform.scale(load_image(my_hero_image), (120, 140)), (150, 440))
-        screen.blit(pygame.transform.scale(load_image(HERO_LIST[1 - HERO_LIST.index(my_hero_image)]), (120, 140)), (600, 440))
+        screen.blit(pygame.transform.scale(load_image(HERO_LIST[1 - HERO_LIST.index(my_hero_image)]), (120, 140)),
+                    (600, 440))
     else:
         screen.blit(pygame.transform.scale(load_image(HERO_LIST[0]), (120, 140)), (150, 440))
         screen.blit(pygame.transform.scale(load_image(HERO_LIST[1]), (120, 140)), (600, 440))
+    if load_map:
+        tiles_group.draw(screen)
+    else:
+        my_board.render()
     total_play()
-    my_board.render()
     en_board.render()
     pygame.display.flip()
 terminate()
