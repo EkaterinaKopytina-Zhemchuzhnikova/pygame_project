@@ -146,52 +146,150 @@ def readfile(filename):
         pygame.display.flip()
 
 
-class MyBoard:
-    # создание поля игрока-человека
-    def __init__(self, width, height):
+class Board:
+    def __init__(self, width, height, left=10, top=10, cell_size=30):
         self.width, self.height = width, height
         self.board = [[0] * width for _ in range(height)]
-        # значения по умолчанию
-        self.x_0, self.y_0, self.cell_size = 10, 10, 30
-
-        self.cnt_single_decks = 4
-        self.cnt_double_decks = 3
-        self.cnt_three_deck = 2
-        self.cnt_four_deck = 1
-        self.cnt_hit_my_board = 0
-        self.cnt_boat = 10
-
-    # настройка внешнего вида
-    def set_view(self, x_0, y_0, cell_size):
-        self.x_0 = x_0
-        self.y_0 = y_0
-        self.cell_size = cell_size
-        self.water, self.paluba = pygame.transform.scale(load_image('water2.jpg'),
-                                                         (self.cell_size, self.cell_size)), pygame.transform.scale(
-            load_image('one.png'), (self.cell_size, self.cell_size))
-        self.bomb = pygame.transform.scale(load_image('boom.png'),
-                                           (self.cell_size - 3, self.cell_size - 3))
+        self.set_view(left, top, cell_size)
 
     def render(self):
         for y in range(self.height):
             for x in range(self.width):
-                screen.blit(self.water, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
+                pygame.draw.rect(screen, pygame.Color(255, 255, 255),
+                                 (x * self.cell_size + self.left, y * self.cell_size + self.top,
+                                  self.cell_size,
+                                  self.cell_size), 1)
+
+    def set_view(self, left, top, cell_size):
+        self.left = left
+        self.top = top
+        self.cell_size = cell_size
+
+    def on_click(self, cell):
+        pass
+
+    def get_cell(self, mouse_pos):
+        cell_x = (mouse_pos[0] - self.left) // self.cell_size
+        cell_y = (mouse_pos[1] - self.top) // self.cell_size
+        if cell_x < 0 or cell_x >= self.width or cell_y < 0 or cell_y >= self.height:
+            return None
+        return cell_x, cell_y
+
+    def get_click(self, mouse_pos):
+        cell = self.get_cell(mouse_pos)
+        if cell:
+            self.on_click(cell)
+
+
+class MyBoard(Board):
+    # создание поля игрока-человека
+    def __init__(self, width, height, left=10, top=10, cell_size=30):
+        super().__init__(width, height, left, top, cell_size)
+        self.width, self.height = width, height
+        self.board = [[0] * width for _ in range(height)]  # поле для стрельбы ИИ
+        self.shooting_board = ([[1] * (width + 2)] + [[1] + [0] * width + [1] for _ in range(height)] +
+                               [[1] * (width + 2)])
+        self.current_ship_coords = []
+        self.x_0, self.y_0, self.cell_size = left, top, cell_size
+        self.cnt_my_board_kill = 0
+        self.cnt_single_decks, self.cnt_double_decks = 4, 3
+        self.cnt_three_deck, self.cnt_four_deck = 2, 1
+        self.cnt_boat = 10
+        self.set_view(10, 10, 40)
+        self.water, self.paluba = pygame.transform.scale(load_image('water2.jpg'),
+                                                         (self.cell_size,
+                                                          self.cell_size)), pygame.transform.scale(
+            load_image('one.png'), (self.cell_size, self.cell_size))
+        self.bomb = pygame.transform.scale(load_image('boom.png'),
+                                           (self.cell_size - 3, self.cell_size - 3))
+
+    def next_shot(self):
+        max_dist = 0
+        x1, y1 = self.current_ship_coords[0]
+        x2, y2 = self.current_ship_coords[-1]
+        if x1 == x2:
+            if y1 > 0:
+                dist = y1 - max(filter(lambda y: self.shooting_board[y][x1], range(y1)))
+                if dist > max_dist:
+                    max_dist = dist
+                    result = x1, y1 - 1
+            if y2 < self.height - 1:
+                dist = min(filter(lambda y: self.shooting_board[y][x1],
+                                  range(y2 + 1, self.height + 2))) - y2
+                if dist > max_dist:
+                    max_dist = dist
+                    result = x2, y2 + 1
+        if y1 == y2:
+            if x1 > 0:
+                dist = x1 - max(filter(lambda x: self.shooting_board[y1][x], range(x1)))
+                if dist > max_dist:
+                    max_dist = dist
+                    result = x1 - 1, y1
+            if x2 < self.width - 1:
+                dist = min(filter(lambda x: self.shooting_board[y1][x],
+                                  range(x2 + 1, self.width + 2))) - x2
+                if dist > max_dist:
+                    result = x2 + 1, y2
+        return result
+
+    def mark_neighbors(self):
+        for x, y in self.current_ship_coords:
+            for dy in range(-1, 2):
+                for dx in range(-1, 2):
+                    self.shooting_board[y + dy][x + dx] = 1
+
+    def attack(self):
+        global move
+        if self.current_ship_coords:
+            for _ in range(1_000_000):
+                pass
+            x, y = self.next_shot()
+        else:
+            y = choice(list(filter(lambda y: list(filter(lambda el: el == 0, self.shooting_board[y])),
+                                   range(self.height + 2))))
+            x = choice(list(filter(lambda x: self.shooting_board[y][x] == 0, range(self.width + 2))))
+        if self.board[y - 1][x - 1] > 0:
+            self.cnt_my_board_kill += 1
+            if self.current_ship_coords and (x, y) > self.current_ship_coords[0]:
+                self.current_ship_coords.append((x, y))
+            else:
+                self.current_ship_coords.insert(0, (x, y))
+            if self.board[y - 1][x - 1] == len(self.current_ship_coords):
+                self.mark_neighbors()
+                self.current_ship_coords.clear()
+            self.board[y - 1][x - 1] = -1
+        else:
+            self.shooting_board[y][x] = 1
+            self.board[y - 1][x - 1] = -2
+            move = not move
+
+    def render(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                screen.blit(self.water,
+                            (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == 1:
-                    screen.blit(self.paluba, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
+                    screen.blit(self.paluba,
+                                (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == 2:
-                    screen.blit(self.paluba, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
+                    screen.blit(self.paluba,
+                                (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == 3:
-                    screen.blit(self.paluba, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
+                    screen.blit(self.paluba,
+                                (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == 4:
-                    screen.blit(self.paluba, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
+                    screen.blit(self.paluba,
+                                (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == -1:
-                    screen.blit(self.bomb, (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
+                    screen.blit(self.bomb,
+                                (x * self.cell_size + self.x_0, y * self.cell_size + self.y_0))
                 if self.board[y][x] == -2:
                     pygame.draw.rect(screen, pygame.Color('red'), (
                         x * self.cell_size + self.cell_size // 2 + self.x_0,
                         y * self.cell_size + self.cell_size // 2 + self.y_0, 3, 3))
                 pygame.draw.rect(screen, pygame.Color(255, 255, 255), (
-                    x * self.cell_size + self.x_0, y * self.cell_size + self.y_0, self.cell_size, self.cell_size), 1)
+                    x * self.cell_size + self.x_0, y * self.cell_size + self.y_0, self.cell_size,
+                    self.cell_size), 1)
 
     def number_of_neighbors(self, x, y):  # считаем количество соседей
         result = 0
@@ -255,7 +353,8 @@ class MyBoard:
                 self.cnt_boat -= 1
 
         if four and right and x + 3 < 10:
-            if not self.number_of_neighbors(x, y) and not self.number_of_neighbors(x_end, y_end) and self.cnt_four_deck:
+            if not self.number_of_neighbors(x, y) and not self.number_of_neighbors(x_end,
+                                                                                   y_end) and self.cnt_four_deck:
                 self.board[y][x] = 4
                 self.board[y_end][x_end] = 4
                 self.board[y_end][x_end - 1] = 4
@@ -263,7 +362,8 @@ class MyBoard:
                 self.cnt_four_deck -= 1
                 self.cnt_boat -= 1
         elif four and not right and y + 3 < 10:
-            if not self.number_of_neighbors(x, y) and not self.number_of_neighbors(x_end, y_end) and self.cnt_four_deck:
+            if not self.number_of_neighbors(x, y) and not self.number_of_neighbors(x_end,
+                                                                                   y_end) and self.cnt_four_deck:
                 self.board[y][x] = 4
                 self.board[y_end][x_end] = 4
                 self.board[y_end - 1][x_end] = 4
@@ -274,170 +374,53 @@ class MyBoard:
             global can_arrange
             can_arrange = False
 
-    def get_cell(self, mouse_pos):
-        cell_x = (mouse_pos[0] - self.x_0) // self.cell_size
-        cell_y = (mouse_pos[1] - self.y_0) // self.cell_size
-        if cell_x < 0 or cell_x >= self.width or cell_y < 0 or cell_y >= self.height:
-            return None
-        return cell_x, cell_y
 
-    def get_click(self, mouse_pos):
-        cell = self.get_cell(mouse_pos)
-        if cell:
-            self.on_click(cell)
-
-
-class EnemyBoard:
-    # создание поля
-    def __init__(self, width, height):
-        self.width, self.height = width, height
+class EnemyBoard(Board):
+    # создание поля соперника
+    def __init__(self, width, height, left=50, top=10, cell_size=30):
+        super().__init__(width, height, left, top, cell_size)
         self.board = [[0] * width for _ in range(height)]
-        # значения по умолчанию
-        self.left, self.top, self.cell_size = 50, 10, 30
-        self.cnt_one = 4
-        self.cnt_two = 3
-        self.cnt_three = 2
-        self.cnt_four = 1
+        self.left, self.top, self.cell_size = left, top, cell_size
+        self.cnt_one, self.cnt_two, self.cnt_three, self.cnt_four = 4, 3, 2, 1
         self.cnt_hit_enemy_board = 0
-        self.hitting_the_ship = False
-        self.battle_dict = {1: 4, 2: 3, 3: 2, 4: 1}
-        self.likely_positions = []
-        self.next_step = False
-        self.ships_coord = []
-
-    def render(self):
-        for y in range(self.height):
-            for x in range(self.width):
-                screen.blit(self.water, (x * self.cell_size + self.left, y * self.cell_size + self.top))
-                if self.board[y][x] == 1:
-                    pygame.draw.rect(screen, pygame.Color('green'), (
-                        x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size, self.cell_size))
-                if self.board[y][x] == 2:
-                    pygame.draw.rect(screen, pygame.Color('green'), (
-                        x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size,
-                        self.cell_size))
-                if self.board[y][x] == 3:
-                    pygame.draw.rect(screen, pygame.Color('green'), (
-                        x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size, self.cell_size))
-                if self.board[y][x] == 4:
-                    pygame.draw.rect(screen, pygame.Color('green'), (
-                        x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size, self.cell_size))
-
-                if self.board[y][x] == -1:
-                    screen.blit(self.bomb, (x * self.cell_size + self.left, y * self.cell_size + self.top))
-                if self.board[y][x] == -2:
-                    pygame.draw.rect(screen, pygame.Color('red'), (
-                        x * self.cell_size + self.cell_size // 2 + self.left,
-                        y * self.cell_size + self.cell_size // 2 + self.top, 3, 3))
-                pygame.draw.rect(screen, pygame.Color(255, 255, 255),
-                                 (x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size,
-                                  self.cell_size), 1)
-
-    # настройка внешнего вида
-    def set_view(self, left, top, cell_size):
-        self.left = left
-        self.top = top
-        self.cell_size = cell_size
+        self.set_view(450, 10, 40)
         self.bomb = pygame.transform.scale(load_image('boom.png'),
                                            (self.cell_size - 3, self.cell_size - 3))
         self.water = pygame.transform.scale(load_image('water.jpg'),
                                             (self.cell_size, self.cell_size))
 
-    def get_cell(self, mouse_pos):
-        cell_x = (mouse_pos[0] - self.left) // self.cell_size
-        cell_y = (mouse_pos[1] - self.top) // self.cell_size
-        if cell_x < 0 or cell_x >= self.width or cell_y < 0 or cell_y >= self.height:
-            return None
-        return cell_x, cell_y
+    def render(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                screen.blit(self.water,
+                            (x * self.cell_size + self.left, y * self.cell_size + self.top))
+                if self.board[y][x] == -1:
+                    screen.blit(self.bomb,
+                                (x * self.cell_size + self.left, y * self.cell_size + self.top))
+                if self.board[y][x] == -2:
+                    pygame.draw.rect(screen, pygame.Color('red'), (
+                        x * self.cell_size + self.cell_size // 2 + self.left,
+                        y * self.cell_size + self.cell_size // 2 + self.top, 3, 3))
+                pygame.draw.rect(screen, pygame.Color(255, 255, 255),
+                                 (x * self.cell_size + self.left, y * self.cell_size + self.top,
+                                  self.cell_size,
+                                  self.cell_size), 1)
 
     def get_click(self, mouse_pos):
-        global move
-        print(move)
-        if move:
-            cell = self.get_cell(mouse_pos)
-            move = not move
-            print(move)
-            self.on_click(cell)
-            self.attack()
+        cell = self.get_cell(mouse_pos)
+        self.on_click(cell)
 
     def on_click(self, cell):
+        global move
         x, y = cell
-        if self.board[y][x] and self.board[y][x] != -2:
-            self.board[y][x] = -1
-            self.cnt_hit_enemy_board += 1
+        if self.board[y][x] and self.board[y][x] != -2:  # если в этой клетке не пусто и туда не били
+            self.board[y][x] = -1  # попали
+            self.cnt_hit_enemy_board += 1  # записали в своё достижение палубу
         else:
-            self.board[y][x] = -2
-
-    def attack(self):
-        global move
-        if not move:
+            self.board[y][x] = -2  # мимо
             move = not move
-            if not self.next_step:
-                cell = self.get_random_position()
-                if cell:
-                    x, y = cell
-                    if my_board.board[y][x] and my_board.board[y][x] != -2 and my_board.board[y][x] != -1:
-                        self.rang = my_board.board[y][x]
-                        my_board.board[y][x] = -1
-                        self.hitting_the_ship = True
-                        self.hitting_pos = y, x
-                    elif not my_board.board[y][x]:
-                        my_board.board[y][x] = -2
-            # elif self.next_step:
-            #     my_board.board[self.step[1]][self.step[0]] = -1
 
-            if self.hitting_the_ship:
-                self.answer_the_questions_enemy(self.hitting_pos)
-
-    def answer_the_questions_enemy(self, coord):
-        global move
-        y, x = coord
-        print("координаты переданные в функцию", coord)
-        if coord not in self.ships_coord:
-            self.ships_coord.append(coord)
-        answer = input('убит, ранен или мимо?')
-        if answer == "убит":
-            self.hitting_the_ship = False
-            for y, x in self.ships_coord:
-                for dy in range(-1, 2):
-                    for dx in range(-1, 2):
-                        if x + dx < 0 or x + dx >= self.width or y + dy < 0 or y + dy >= self.height:
-                            continue
-                        if my_board.board[y + dy][x + dx] == 0:
-                            print(my_board.board[y + dy][x + dx])
-                            my_board.board[y + dy][x + dx] = -2
-                        elif my_board.board[y + dy][x + dx] > 0:
-                            print(my_board.board[y + dy][x + dx])
-                            my_board.board[y + dy][x + dx] = -1
-            self.battle_dict[len(self.ships_coord)] -= 1
-            self.likely_positions.clear()
-            self.ships_coord.clear()
-            self.next_step = False
-
-        elif answer == "ранен":
-            for dy in range(-1, 2):
-                for dx in range(-1, 2):
-                    # ходим по вертикали либо горизонтали
-                    if dx * dy != 0:
-                        continue
-                    # за пределы поля не выходим
-                    if x + dx < 0 or x + dx >= self.width or y + dy < 0 or y + dy >= self.height:
-                        continue
-                    if my_board.board[y + dy][x + dx] == self.rang:
-                        print(my_board.board[y + dy][x + dx], my_board.board[y][x])
-                        self.likely_positions.append((y + dy, x + dx))
-            if self.likely_positions:
-                self.step = self.likely_positions.pop(0)
-                self.ships_coord.append(self.step)
-                print("очередной шаг", self.step)
-                print("вероятные позиции", self.likely_positions)
-                self.next_step = True
-            print('сейчас в списке палубы', self.ships_coord)
-
-        # elif answer == "мимо":
-        #     self.ships_coord -= self.ships_coord[-1]
-
-    def number_of_neighbors_of_enemy(self, x, y):  # считаем количество соседей
+    def number_of_neighbors_of_enemy(self, x, y):
         result = 0
         for dy in range(-1, 2):
             for dx in range(-1, 2):
@@ -462,7 +445,8 @@ class EnemyBoard:
                 x_next, y_next = x, y + 1
             else:
                 continue
-            if not self.number_of_neighbors_of_enemy(x, y) and not self.number_of_neighbors_of_enemy(x_end, y_end):
+            if not self.number_of_neighbors_of_enemy(x, y) and not self.number_of_neighbors_of_enemy(
+                    x_end, y_end):
                 self.board[y][x] = 4
                 self.board[y_end][x_end] = 4
                 self.board[y_pre_end][x_pre_end] = 4
@@ -482,7 +466,8 @@ class EnemyBoard:
                 x_next, y_next = x, y + 1
             else:
                 continue
-            if not self.number_of_neighbors_of_enemy(x, y) and not self.number_of_neighbors_of_enemy(x_end, y_end):
+            if not self.number_of_neighbors_of_enemy(x, y) and not self.number_of_neighbors_of_enemy(
+                    x_end, y_end):
                 self.board[y][x] = 3
                 self.board[y_end][x_end] = 3
                 self.board[y_next][x_next] = 3
@@ -499,7 +484,8 @@ class EnemyBoard:
                 x_end, y_end = x, y + 1
             else:
                 continue
-            if not self.number_of_neighbors_of_enemy(x, y) and not self.number_of_neighbors_of_enemy(x_end, y_end):
+            if not self.number_of_neighbors_of_enemy(x, y) and not self.number_of_neighbors_of_enemy(
+                    x_end, y_end):
                 self.board[y][x] = 2
                 self.board[y_end][x_end] = 2
                 self.cnt_two -= 1
@@ -513,12 +499,9 @@ class EnemyBoard:
                     self.cnt_one -= 1
 
     def get_random_position(self):
-        while True:
-            x = randint(0, self.width)
-            y = randint(0, self.height)
-            if x < 0 or x >= self.width or y < 0 or y >= self.height:
-                continue
-            return x, y
+        x = randint(0, self.width - 1)
+        y = randint(0, self.height - 1)
+        return x, y
 
 
 def congradulations(winner):
@@ -530,9 +513,7 @@ def congradulations(winner):
     text_y = HEIGHT // 2 - text.get_height() // 2
     text_w = text.get_width()
     text_h = text.get_height()
-
     create_baloon((text_x, text_y, text_w, text_h))
-
     clock = pygame.time.Clock()
     while True:
         for event in pygame.event.get():
@@ -560,7 +541,8 @@ class Baloon(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.mess_rect = mess_rect
         while True:
-            self.rect.x, self.rect.y = randint(0, WIDTH - self.rect.w), randint(0, HEIGHT - self.rect.h)
+            self.rect.x, self.rect.y = randint(0, WIDTH - self.rect.w), randint(0,
+                                                                                HEIGHT - self.rect.h)
             if not self.rect.colliderect(self.mess_rect):
                 break
 
@@ -576,7 +558,7 @@ def create_baloon(mess_rect):
         Baloon(mess_rect)
 
 
-def total_play(my_total=3, enemy_total=3):
+def total_play(my_total=0, enemy_total=0):
     font = pygame.font.Font(None, 50)
     text1 = font.render("Счёт", True, pygame.Color("white"))
     text1_x, text1_y = 380, 430
@@ -584,11 +566,16 @@ def total_play(my_total=3, enemy_total=3):
     text2_x, text2_y = 380, 500
     screen.blit(text1, (text1_x, text1_y))
     screen.blit(text2, (text2_x, text2_y))
+    if my_total == 20:
+        winner = 'people'
+        congradulations(winner)
+    elif enemy_total == 20:
+        winner = 'II'
+        congradulations(winner)
 
 
 def load_map_file(filename):
     filename = "data/" + filename
-    # читаем уровень, убирая символы перевода строки
     with open(filename, 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
     max_width = max(map(len, level_map))
@@ -605,51 +592,41 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x + 10, tile_height * pos_y + 10)
 
 
-def generate_map(my_map):
+def generate_map(my_map, my_board):
     for y in range(len(my_map)):
         for x in range(len(my_map[y])):
             if my_map[y][x] == '.':
                 Tile('water', x, y)
-            elif my_map[y][x] == '#':
+            else:
                 Tile('boat', x, y)
+                my_board.board[y][x] = int(my_map[y][x])
 
 
-# congradulations('people')
-load_map = False
-my_hero_image = None
+load_map, my_hero_image = False, None
 start_screen()
 load_music('base.wav')
 en_board = EnemyBoard(10, 10)
-en_board.set_view(450, 10, 40)
+my_board = MyBoard(10, 10)
 en_board.take_a_cage()
-running = True
+running, move, can_arrange = True, True, True
 one = two = three = four = right = None
-move = True
-can_arrange = True
 if load_map:
     tile_width = tile_height = 40
     tile_images = {'water': pygame.transform.scale(load_image('water.jpg'),
                                                    (tile_width, tile_height)),
                    'boat': pygame.transform.scale(load_image('one.png'), (tile_width, tile_height))}
 
-    generate_map(load_map_file(choice(['first_test_map.txt', 'second_test_map.txt'])))
-else:
-    my_board = MyBoard(10, 10)
-    my_board.set_view(10, 10, 40)
-
+    generate_map(load_map_file(choice(['first_test_map.txt', 'second_test_map.txt'])), my_board)
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if can_arrange:
-                pass
-                # if load_map:
-                #     tile.get_click(event.pos)
-                # else:
-                #     my_board.get_click(event.pos)
+            if not load_map and can_arrange:
+                my_board.get_click(event.pos)
             else:
-                en_board.get_click(event.pos)
+                if move:
+                    en_board.get_click(event.pos)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
                 right = True
@@ -663,19 +640,22 @@ while running:
                 one, two, three, four = False, False, True, False
             elif event.key == pygame.K_4:
                 one, two, three, four = False, False, False, True
+    if not move:
+        my_board.attack()
     screen.fill((0, 0, 0))
     if my_hero_image:
         screen.blit(pygame.transform.scale(load_image(my_hero_image), (120, 140)), (150, 440))
-        screen.blit(pygame.transform.scale(load_image(HERO_LIST[1 - HERO_LIST.index(my_hero_image)]), (120, 140)),
+        screen.blit(pygame.transform.scale(load_image(HERO_LIST[1 - HERO_LIST.index(my_hero_image)]),
+                                           (120, 140)),
                     (600, 440))
     else:
         screen.blit(pygame.transform.scale(load_image(HERO_LIST[0]), (120, 140)), (150, 440))
         screen.blit(pygame.transform.scale(load_image(HERO_LIST[1]), (120, 140)), (600, 440))
     if load_map:
         tiles_group.draw(screen)
-    else:
-        my_board.render()
-    total_play()
+    total_play(my_total=en_board.cnt_hit_enemy_board,
+               enemy_total=my_board.cnt_my_board_kill)
+    my_board.render()
     en_board.render()
     pygame.display.flip()
 terminate()

@@ -10,16 +10,30 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="90ceddea-6b2e-4a3e-a561-98c5103e3823" name="Default Changelist" comment="с морем и выбором героев" />
+    <list default="true" id="f79bb8d1-17c3-409c-b743-1c6002b5d2f9" name="Default Changelist" comment="с тайлами и музыкой">
+      <change afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/board.py" beforeDir="false" afterPath="$PROJECT_DIR$/board.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/Help.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/Help.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/first_test_map.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/first_test_map.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/second_test_map.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/second_test_map.txt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectId" id="1kKnCqp8vrujmbmmhfryf8SEcmX" />
+  <component name="ProjectId" id="1l3SBeKJ6KyGa2jLs0Ck2MpskSv" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -28,18 +42,40 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager">
-    <configuration name="board" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="pygame_project" />
+  <component name="RunManager" selected="Python.board">
+    <configuration name="Столицы республик" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Проект на PyGame" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Desktop" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$USER_HOME$/Desktop/Столицы республик.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="board" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Проект на PyGame" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Python\Python38-32\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/board.py" />
@@ -54,6 +90,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.board" />
+        <item itemvalue="Python.Столицы республик" />
       </list>
     </recent_temporary>
   </component>
@@ -62,41 +99,34 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="90ceddea-6b2e-4a3e-a561-98c5103e3823" name="Default Changelist" comment="" />
-      <created>1605458025848</created>
+      <changelist id="f79bb8d1-17c3-409c-b743-1c6002b5d2f9" name="Default Changelist" comment="" />
+      <created>1606824147271</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1605458025848</updated>
+      <updated>1606824147271</updated>
     </task>
-    <task id="LOCAL-00001" summary="установка своих кораблей и противника">
-      <created>1605458437063</created>
+    <task id="LOCAL-00001" summary="с экранами заставки">
+      <created>1606853489467</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1605458437063</updated>
+      <updated>1606853489467</updated>
     </task>
-    <task id="LOCAL-00002" summary=" с экранами заставки">
-      <created>1606853833555</created>
+    <task id="LOCAL-00002" summary="с морем и выбором игрока">
+      <created>1606939747889</created>
       <option name="number" value="00002" />
       <option name="presentableId" value="LOCAL-00002" />
       <option name="project" value="LOCAL" />
-      <updated>1606853833555</updated>
+      <updated>1606939747889</updated>
     </task>
-    <task id="LOCAL-00003" summary="с героями-пиратами">
-      <created>1606902046816</created>
+    <task id="LOCAL-00003" summary="с тайлами и музыкой">
+      <created>1607018345196</created>
       <option name="number" value="00003" />
       <option name="presentableId" value="LOCAL-00003" />
       <option name="project" value="LOCAL" />
-      <updated>1606902046816</updated>
+      <updated>1607018345196</updated>
     </task>
-    <task id="LOCAL-00004" summary="с морем и выбором героев">
-      <created>1606939935699</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1606939935699</updated>
-    </task>
-    <option name="localTasksCounter" value="5" />
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -112,40 +142,52 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="установка своих кораблей и противника" />
-    <MESSAGE value=" с экранами заставки" />
-    <MESSAGE value="с героями-пиратами" />
-    <MESSAGE value="с морем и выбором героев" />
-    <option name="LAST_COMMIT_MESSAGE" value="с морем и выбором героев" />
+    <MESSAGE value="с экранами заставки" />
+    <MESSAGE value="с морем и выбором игрока" />
+    <MESSAGE value="с тайлами и музыкой" />
+    <option name="LAST_COMMIT_MESSAGE" value="с тайлами и музыкой" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="392" y="0" key="#board" timestamp="1606939803843">
+    <state x="392" y="0" key="#board" timestamp="1609068914222">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="392" y="0" key="#board/0.0.1366.728@0.0.1366.728" timestamp="1606939803843" />
-    <state x="463" y="118" key="FileChooserDialogImpl" timestamp="1605458224377">
+    <state x="392" y="0" key="#board/0.0.1366.728@0.0.1366.728" timestamp="1609068914222" />
+    <state x="651" y="169" key="FileChooserDialogImpl" timestamp="1607700801285">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="463" y="118" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1607185293999" />
+    <state x="651" y="169" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1607700801285" />
+    <state width="1345" height="117" key="GridCell.Tab.0.bottom" timestamp="1609089913210">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="463" y="118" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1605458224377" />
-    <state width="1345" height="179" key="GridCell.Tab.0.bottom" timestamp="1606940002998">
+    <state width="1345" height="117" key="GridCell.Tab.0.bottom/0.0.1366.728@0.0.1366.728" timestamp="1609089913210" />
+    <state width="1899" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1607348521240" />
+    <state width="1345" height="117" key="GridCell.Tab.0.center" timestamp="1609089913210">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1345" height="179" key="GridCell.Tab.0.bottom/0.0.1366.728@0.0.1366.728" timestamp="1606940002998" />
-    <state width="1345" height="179" key="GridCell.Tab.0.center" timestamp="1606940002998">
+    <state width="1345" height="117" key="GridCell.Tab.0.center/0.0.1366.728@0.0.1366.728" timestamp="1609089913210" />
+    <state width="1899" height="282" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1607348521240" />
+    <state width="1345" height="117" key="GridCell.Tab.0.left" timestamp="1609089913210">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1345" height="179" key="GridCell.Tab.0.center/0.0.1366.728@0.0.1366.728" timestamp="1606940002998" />
-    <state width="1345" height="179" key="GridCell.Tab.0.left" timestamp="1606940002998">
+    <state width="1345" height="117" key="GridCell.Tab.0.left/0.0.1366.728@0.0.1366.728" timestamp="1609089913210" />
+    <state width="1899" height="282" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1607348521240" />
+    <state width="1345" height="117" key="GridCell.Tab.0.right" timestamp="1609089913210">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1345" height="179" key="GridCell.Tab.0.left/0.0.1366.728@0.0.1366.728" timestamp="1606940002998" />
-    <state width="1345" height="179" key="GridCell.Tab.0.right" timestamp="1606940002998">
+    <state width="1345" height="117" key="GridCell.Tab.0.right/0.0.1366.728@0.0.1366.728" timestamp="1609089913210" />
+    <state width="1899" height="282" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1607348521240" />
+    <state x="461" y="162" key="SettingsEditor" timestamp="1607324982212">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="461" y="162" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1607324982212" />
+    <state x="275" y="96" key="Vcs.Push.Dialog.v2" timestamp="1606853675029">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1345" height="179" key="GridCell.Tab.0.right/0.0.1366.728@0.0.1366.728" timestamp="1606940002998" />
-    <state x="275" y="96" key="Vcs.Push.Dialog.v2" timestamp="1606939948205">
+    <state x="275" y="96" key="Vcs.Push.Dialog.v2/0.0.1366.728@0.0.1366.728" timestamp="1606853675029" />
+    <state x="346" y="49" key="search.everywhere.popup" timestamp="1606901727894">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="275" y="96" key="Vcs.Push.Dialog.v2/0.0.1366.728@0.0.1366.728" timestamp="1606939948205" />
+    <state x="346" y="49" key="search.everywhere.popup/0.0.1366.728@0.0.1366.728" timestamp="1606901727894" />
   </component>
 </project>
